@@ -1,5 +1,17 @@
 # kysely-codegen-sqlite
 
+## 0.2.0
+
+### Minor Changes
+
+- dd3ebbe: Remove dialect selection feature for SQLite-only simplification
+  - Remove `--dialect` CLI flag
+  - Remove `dialect` option from config
+  - Remove `DialectName` type and `dialectNameSchema`
+  - Remove `VALID_DIALECTS` constant
+  - Simplify `getDialect()` to return SQLite dialect directly
+  - Simplify `ConnectionStringParser` to return connection string only
+
 ## 0.1.5
 
 ### Patch Changes
