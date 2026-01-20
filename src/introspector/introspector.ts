@@ -12,7 +12,6 @@ export type IntrospectOptions<DB> = {
   db: Kysely<DB>;
   excludePattern?: string | null;
   includePattern?: string | null;
-  partitions?: boolean;
 };
 
 /**

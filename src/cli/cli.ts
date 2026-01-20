@@ -1,14 +1,11 @@
 import { cosmiconfigSync } from 'cosmiconfig';
 import minimist from 'minimist';
 import { resolve } from 'node:path';
-import type { RuntimeEnumsStyle } from '../generator';
 import { getDialect } from '../generator';
 import { ConnectionStringParser } from '../generator/connection-string-parser';
 import { generate } from '../generator/generator/generate';
 import { DEFAULT_LOG_LEVEL } from '../generator/logger/log-level';
 import { Logger } from '../generator/logger/logger';
-import type { DateParser } from '../introspector/dialects/postgres/date-parser';
-import type { NumericParser } from '../introspector/dialects/postgres/numeric-parser';
 import type { Config, DialectName } from './config';
 import { configSchema, dialectNameSchema } from './config';
 import { ConfigError } from './config-error';
@@ -49,12 +46,7 @@ export class Cli {
       logger.info(`No dialect specified. Assuming '${dialectName}'.`);
     }
 
-    const dialect = getDialect(dialectName, {
-      dateParser: options.dateParser,
-      domains: options.domains,
-      numericParser: options.numericParser,
-      partitions: options.partitions,
-    });
+    const dialect = getDialect(dialectName);
 
     const db = await dialect.introspector.connect({
       connectionString,
@@ -72,9 +64,7 @@ export class Cli {
       logger,
       outFile: options.outFile,
       overrides: options.overrides,
-      partitions: options.partitions,
       print: options.print,
-      runtimeEnums: options.runtimeEnums,
       serializer: options.serializer,
       singularize: options.singularize,
       typeMapping: options.typeMapping,
@@ -101,41 +91,9 @@ export class Cli {
     return !!input && input !== 'false';
   }
 
-  #parseDateParser(input: any): DateParser | undefined {
-    switch (input) {
-      case 'string':
-      case 'timestamp':
-        return input;
-      default:
-        return undefined;
-    }
-  }
-
   #parseDialectName(input: any): DialectName | undefined {
     const result = dialectNameSchema.safeParse(input);
     return result.success ? result.data : undefined;
-  }
-
-  #parseNumericParser(input: any): NumericParser | undefined {
-    switch (input) {
-      case 'number':
-      case 'number-or-string':
-      case 'string':
-        return input;
-      default:
-        return undefined;
-    }
-  }
-
-  #parseRuntimeEnums(input: any): RuntimeEnumsStyle | boolean | undefined {
-    if (input === undefined) return undefined;
-    switch (input) {
-      case 'pascal-case':
-      case 'screaming-snake-case':
-        return input;
-      default:
-        return this.#parseBoolean(input);
-    }
   }
 
   #parseString(input: any): string | undefined {
@@ -236,23 +194,18 @@ export class Cli {
         typeof argv['custom-imports'] === 'string'
           ? JSON.parse(argv['custom-imports'])
           : undefined,
-      dateParser: this.#parseDateParser(argv['date-parser']),
       defaultSchemas: this.#parseStringArray(argv['default-schema']),
       dialect: this.#parseDialectName(argv.dialect),
-      domains: this.#parseBoolean(argv.domains),
       envFile: this.#parseString(argv['env-file']),
       excludePattern: this.#parseString(argv['exclude-pattern']),
       includePattern: this.#parseString(argv['include-pattern']),
       logLevel,
-      numericParser: this.#parseNumericParser(argv['numeric-parser']),
       outFile: this.#parseString(argv['out-file']),
       overrides:
         typeof argv.overrides === 'string'
           ? JSON.parse(argv.overrides)
           : undefined,
-      partitions: this.#parseBoolean(argv.partitions),
       print: this.#parseBoolean(argv.print),
-      runtimeEnums: this.#parseRuntimeEnums(argv['runtime-enums']),
       singularize: this.#parseBoolean(argv.singularize),
       typeMapping:
         typeof argv['type-mapping'] === 'string'

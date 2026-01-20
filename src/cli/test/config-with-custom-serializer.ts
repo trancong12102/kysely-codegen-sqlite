@@ -2,6 +2,7 @@ import type { DatabaseMetadata } from '../../introspector';
 import type { Config } from '../config';
 
 const config: Config = {
+  dialect: 'sqlite',
   logLevel: 'debug',
   outFile: null,
   serializer: {
@@ -21,7 +22,7 @@ const config: Config = {
         .join('\n\n');
     },
   },
-  url: 'postgres://user:password@localhost:5433/database',
+  url: ':memory:',
 };
 
 export default config;

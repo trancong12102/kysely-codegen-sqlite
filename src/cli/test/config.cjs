@@ -1,13 +1,9 @@
 module.exports = {
   camelCase: true,
-  defaultSchemas: ['cli'],
-  dialect: 'postgres',
-  includePattern: 'cli.*',
+  dialect: 'sqlite',
   logLevel: 'error',
   outFile: './output.snapshot.ts',
-  runtimeEnums: 'pascal-case',
-  singularize: { '/(bacch)(?:us|i)$/i': '$1us' },
   typeOnlyImports: false,
-  url: 'postgres://user:password@localhost:5433/database',
+  url: ':memory:',
   verify: true,
 };

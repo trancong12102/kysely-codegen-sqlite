@@ -20,8 +20,7 @@ import { PropertyNode } from '../ast/property-node';
 import { RuntimeEnumDeclarationNode } from '../ast/runtime-enum-declaration-node';
 import { TemplateNode } from '../ast/template-node';
 import { UnionExpressionNode } from '../ast/union-expression-node';
-import { MysqlDialect } from '../dialects/mysql/mysql-dialect';
-import { PostgresDialect } from '../dialects/postgres/postgres-dialect';
+import { SqliteDialect } from '../dialects/sqlite/sqlite-dialect';
 import { transform } from '../transformer/transformer';
 import { TypeScriptSerializer } from './serializer';
 
@@ -299,7 +298,7 @@ describe(TypeScriptSerializer.name, () => {
 
   describe(TypeScriptSerializer.prototype.serializeStatements.name, () => {
     it('should be able to singularize table names', () => {
-      const dialect = new PostgresDialect();
+      const dialect = new SqliteDialect();
       const enums = new EnumCollection();
       const singularSerializer = new TypeScriptSerializer({
         singularize: true,
@@ -314,7 +313,7 @@ describe(TypeScriptSerializer.name, () => {
             new TableMetadata({
               columns: [
                 new ColumnMetadata({
-                  dataType: 'varchar',
+                  dataType: 'TEXT',
                   name: 'username',
                   hasDefaultValue: true,
                 }),
@@ -343,116 +342,18 @@ describe(TypeScriptSerializer.name, () => {
           '}\n',
       );
     });
-
-    it('should serialize JSON fields properly', () => {
-      const dialect = new MysqlDialect();
-      const enums = new EnumCollection();
-
-      const ast = transform({
-        camelCase: true,
-        dialect,
-        metadata: new DatabaseMetadata({
-          enums,
-          tables: [
-            new TableMetadata({
-              columns: [
-                new ColumnMetadata({
-                  comment: 'Hello!\nThis is a comment.',
-                  dataType: 'json',
-                  name: 'json',
-                }),
-              ],
-              name: 'foo',
-              schema: 'public',
-            }),
-          ],
-        }),
-      });
-
-      strictEqual(
-        serializer.serializeStatements(ast),
-        'import type { ColumnType } from "kysely";\n' +
-          '\n' +
-          'export type Json = ColumnType<JsonValue, string, string>;\n' +
-          '\n' +
-          'export type JsonArray = JsonValue[];\n' +
-          '\n' +
-          'export type JsonObject = {\n' +
-          '  [x: string]: JsonValue | undefined;\n' +
-          '};\n' +
-          '\n' +
-          'export type JsonPrimitive = boolean | number | string | null;\n' +
-          '\n' +
-          'export type JsonValue = JsonArray | JsonObject | JsonPrimitive;\n' +
-          '\n' +
-          'export interface Foo {\n' +
-          '  /**\n' +
-          '   * Hello!\n' +
-          '   * This is a comment.\n' +
-          '   */\n' +
-          '  json: Json;\n' +
-          '}\n' +
-          '\n' +
-          'export interface DB {\n' +
-          '  foo: Foo;\n' +
-          '}\n',
-      );
-    });
-
-    it('should serialize Postgres JSON fields properly', () => {
-      const dialect = new PostgresDialect();
-      const enums = new EnumCollection();
-
-      const ast = transform({
-        camelCase: true,
-        dialect,
-        metadata: new DatabaseMetadata({
-          enums,
-          tables: [
-            new TableMetadata({
-              columns: [new ColumnMetadata({ dataType: 'json', name: 'json' })],
-              name: 'foo',
-              schema: 'public',
-            }),
-          ],
-        }),
-      });
-
-      strictEqual(
-        serializer.serializeStatements(ast),
-        'export type Json = JsonValue;\n' +
-          '\n' +
-          'export type JsonArray = JsonValue[];\n' +
-          '\n' +
-          'export type JsonObject = {\n' +
-          '  [x: string]: JsonValue | undefined;\n' +
-          '};\n' +
-          '\n' +
-          'export type JsonPrimitive = boolean | number | string | null;\n' +
-          '\n' +
-          'export type JsonValue = JsonArray | JsonObject | JsonPrimitive;\n' +
-          '\n' +
-          'export interface Foo {\n' +
-          '  json: Json;\n' +
-          '}\n' +
-          '\n' +
-          'export interface DB {\n' +
-          '  foo: Foo;\n' +
-          '}\n',
-      );
-    });
   });
 
   describe(TypeScriptSerializer.prototype.serializeFile.name, () => {
     it('should serialize custom imports properly', () => {
-      const dialect = new PostgresDialect();
+      const dialect = new SqliteDialect();
       const metadata = new DatabaseMetadata({
         enums: new EnumCollection(),
         tables: [
           new TableMetadata({
             columns: [
               new ColumnMetadata({
-                dataType: 'text',
+                dataType: 'TEXT',
                 name: 'custom_field',
               }),
             ],

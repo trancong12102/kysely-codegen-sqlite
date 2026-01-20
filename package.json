@@ -28,7 +28,6 @@
     "ci:test": "pnpm test",
     "ci:unused": "knip",
     "dev": "tsx watch ./src/cli/bin.ts",
-    "docker:up": "docker-compose up -d",
     "fix": "run-s fix:*",
     "fix:eslint": "eslint --fix src",
     "fix:prettier": "prettier --write src",
@@ -36,7 +35,7 @@
     "lint:eslint": "eslint src",
     "lint:prettier": "prettier --check src",
     "prepublishOnly": "pnpm run ci",
-    "start": "pnpm build && DATABASE_URL=postgres://user:password@localhost:5433/database node ./dist/cli/bin.js",
+    "start": "pnpm build && node ./dist/cli/bin.js",
     "test": "vitest run --globals --fileParallelism=false --maxConcurrency=1 --maxWorkers=1 --sequence.seed=1",
     "test:watch": "vitest watch --globals --fileParallelism=false --maxConcurrency=1 --maxWorkers=1 --sequence.seed=1",
     "upgrade": "ncu -u"
@@ -55,18 +54,14 @@
   "devDependencies": {
     "@babel/core": "^7.28.3",
     "@babel/eslint-parser": "^7.28.0",
-    "@libsql/kysely-libsql": "^0.4.1",
     "@robinblomberg/eslint-config-prettier": "^0.1.4",
     "@robinblomberg/eslint-config-robinblomberg": "0.30.1",
     "@robinblomberg/prettier-config": "^0.2.0",
-    "@tediousjs/connection-string": "^0.5.0",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/bun": "^1.2.21",
     "@types/git-diff": "^2.0.7",
     "@types/micromatch": "^4.0.9",
     "@types/minimist": "^1.2.5",
     "@types/node": "^24.3.0",
-    "@types/pg": "^8.15.5",
     "@types/pluralize": "^0.0.33",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
@@ -83,64 +78,25 @@
     "execa": "^9.6.0",
     "knip": "^5.63.0",
     "kysely": "^0.28.5",
-    "kysely-bun-sqlite": "^0.4.0",
-    "kysely-bun-worker": "^1.2.1",
     "madge": "^8.0.0",
-    "mysql2": "^3.14.4",
     "npm-run-all": "^4.1.5",
-    "pg": "^8.16.3",
-    "postgres-interval": "^4.0.2",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
-    "tarn": "^3.0.2",
-    "tedious": "^18.6.1",
     "ts-dedent": "^2.2.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "@libsql/kysely-libsql": ">=0.3.0 <0.5.0",
-    "@tediousjs/connection-string": ">=0.5.0 <0.6.0",
     "better-sqlite3": ">=7.6.2 <13.0.0",
-    "kysely": ">=0.27.0 <1.0.0",
-    "kysely-bun-sqlite": ">=0.3.2 <1.0.0",
-    "kysely-bun-worker": ">=1.2.0 <2.0.0",
-    "mysql2": ">=2.3.3 <4.0.0",
-    "pg": ">=8.8.0 <9.0.0",
-    "tarn": ">=3.0.0 <4.0.0",
-    "tedious": ">=18.0.0 <20.0.0"
+    "kysely": ">=0.27.0 <1.0.0"
   },
   "peerDependenciesMeta": {
-    "@libsql/kysely-libsql": {
-      "optional": true
-    },
-    "@tediousjs/connection-string": {
-      "optional": true
-    },
     "better-sqlite3": {
       "optional": true
     },
     "kysely": {
       "optional": false
-    },
-    "kysely-bun-sqlite": {
-      "optional": true
-    },
-    "kysely-bun-worker": {
-      "optional": true
-    },
-    "mysql2": {
-      "optional": true
-    },
-    "pg": {
-      "optional": true
-    },
-    "tarn": {
-      "optional": true
-    },
-    "tedious": {
-      "optional": true
     }
   },
   "engines": {
@@ -179,14 +135,11 @@
       "**/*.snapshot.ts"
     ],
     "ignoreBinaries": [
-      "docker-compose",
       "ncu"
     ],
     "ignoreDependencies": [
       "@babel/core",
       "@babel/eslint-parser",
-      "@libsql/kysely-libsql",
-      "@tediousjs/connection-string",
       "@typescript-eslint/eslint-plugin",
       "@typescript-eslint/parser",
       "better-sqlite3",
@@ -196,13 +149,7 @@
       "eslint-plugin-sort-exports",
       "eslint-plugin-sort-keys",
       "eslint-plugin-storybook",
-      "eslint-plugin-unicorn",
-      "kysely-bun-sqlite",
-      "kysely-bun-worker",
-      "mysql2",
-      "pg",
-      "tarn",
-      "tedious"
+      "eslint-plugin-unicorn"
     ]
   },
   "madge": {

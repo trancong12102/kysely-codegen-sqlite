@@ -21,7 +21,6 @@ import { RuntimeEnumDeclarationNode } from '../ast/runtime-enum-declaration-node
 import type { TemplateNode } from '../ast/template-node';
 import { UnionExpressionNode } from '../ast/union-expression-node';
 import type { GeneratorDialect } from '../dialect';
-import { PostgresDialect } from '../dialects/postgres/postgres-dialect';
 import type { RuntimeEnumsStyle } from '../generator/runtime-enums-style';
 import { toKyselyCamelCase } from '../utils/case-converter';
 import { GLOBAL_DEFINITIONS } from './definitions';
@@ -75,21 +74,6 @@ export type TransformOptions = {
   runtimeEnums?: boolean | RuntimeEnumsStyle;
   typeMapping?: Record<string, string>;
 };
-
-const POSTGRES_RANGE_TYPES = new Set([
-  'datemultirange',
-  'daterange',
-  'int4multirange',
-  'int4range',
-  'int8multirange',
-  'int8range',
-  'nummultirange',
-  'numrange',
-  'tsmultirange',
-  'tsrange',
-  'tstzmultirange',
-  'tstzrange',
-]);
 
 const collectSymbol = (name: string, context: TransformContext) => {
   const definition = context.definitions[name];
@@ -319,13 +303,6 @@ const getTableIdentifier = (
   return transformName(name, context);
 };
 
-const isPostgresRangeType = (dataType: string, context: TransformContext) => {
-  return (
-    context.dialect.adapter.constructor.name === 'PostgresAdapter' &&
-    POSTGRES_RANGE_TYPES.has(dataType)
-  );
-};
-
 const transformColumn = ({
   column,
   context,
@@ -336,15 +313,8 @@ const transformColumn = ({
   table: TableMetadata;
 }) => {
   const overrides = context.overrides?.columns;
-  const isDefaultSchema =
-    !!table.schema && context.defaultSchemas.includes(table.schema);
   const path = `${table.name}.${column.name}`;
-  const override =
-    context.dialect instanceof PostgresDialect
-      ? isDefaultSchema
-        ? (overrides?.[`${table.schema}.${path}`] ?? overrides?.[path])
-        : overrides?.[`${table.schema}.${path}`]
-      : overrides?.[path];
+  const override = overrides?.[path];
 
   if (override !== undefined) {
     const node =
@@ -400,9 +370,7 @@ const transformColumnToArgs = (
 
     // Only apply mapping if this is a known type in the dialect:
     const isKnownType =
-      context.scalars[dataType] ||
-      context.enums.has(dataTypeId) ||
-      isPostgresRangeType(dataType, context);
+      context.scalars[dataType] || context.enums.has(dataTypeId);
 
     if (isKnownType) {
       // Check if the mapped type references a custom import:

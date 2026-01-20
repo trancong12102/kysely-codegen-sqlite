@@ -1,10 +1,5 @@
 import { DEFAULT_OUT_FILE } from '../generator';
-import {
-  DEFAULT_RUNTIME_ENUMS_STYLE,
-  DEFAULT_URL,
-  LOG_LEVEL_NAMES,
-  VALID_DIALECTS,
-} from './constants';
+import { DEFAULT_URL, LOG_LEVEL_NAMES, VALID_DIALECTS } from './constants';
 
 type Flag = {
   default?: string;
@@ -31,12 +26,6 @@ export const FLAGS = [
     example:
       '{"InstantRange":"./custom-types","MyType":"./types#OriginalType"}',
     longName: 'custom-imports',
-  },
-  {
-    default: 'timestamp',
-    description: 'Specify which parser to use for PostgreSQL date values.',
-    longName: 'date-parser',
-    values: ['string', 'timestamp'],
   },
   {
     description: 'Set the default schema(s) for the database connection.',
@@ -73,16 +62,6 @@ export const FLAGS = [
     values: LOG_LEVEL_NAMES,
   },
   {
-    description: 'Skip generating types for PostgreSQL domains.',
-    longName: 'no-domains',
-  },
-  {
-    default: 'string',
-    description: 'Specify which parser to use for PostgreSQL numeric values.',
-    longName: 'numeric-parser',
-    values: ['string', 'number', 'number-or-string'],
-  },
-  {
     default: DEFAULT_OUT_FILE,
     description: 'Set the file build path.',
     longName: 'out-file',
@@ -95,20 +74,8 @@ export const FLAGS = [
   },
   {
     description:
-      'Include partitions of PostgreSQL tables in the generated code.',
-    longName: 'partitions',
-  },
-  {
-    description:
       'Print the generated output to the terminal instead of a file.',
     longName: 'print',
-  },
-  {
-    default: DEFAULT_RUNTIME_ENUMS_STYLE,
-    description:
-      'Generate runtime enums instead of string unions for PostgreSQL enums.',
-    longName: 'runtime-enums',
-    values: ['pascal-case', 'screaming-snake-case'],
   },
   {
     description:
