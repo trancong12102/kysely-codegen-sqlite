@@ -1,5 +1,11 @@
 # kysely-codegen-sqlite
 
+## 0.1.5
+
+### Patch Changes
+
+- 750c7b7: Use changeset publish for automatic GitHub releases
+
 ## 0.1.4
 
 ### Patch Changes
