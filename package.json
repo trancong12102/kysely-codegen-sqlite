@@ -20,7 +20,7 @@
     "build": "rimraf dist && tsc --project ./tsconfig.build.json",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "pnpm build && npm publish --access public",
+    "release": "pnpm build && changeset publish --access public",
     "check:types": "tsc --noEmit",
     "ci": "run-s ci:*",
     "ci:build": "pnpm build",
