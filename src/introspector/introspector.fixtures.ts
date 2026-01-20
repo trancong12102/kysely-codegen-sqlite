@@ -7,6 +7,7 @@ const down = async (db: Kysely<any>, dialect: IntrospectorDialect) => {
 
   await db.schema.dropTable('boolean').ifExists().execute();
   await db.schema.dropTable('foo_bar').ifExists().execute();
+  await db.schema.dropTable('enum_test').ifExists().execute();
 };
 
 const up = async (db: Kysely<any>, dialect: IntrospectorDialect) => {
@@ -25,6 +26,15 @@ const up = async (db: Kysely<any>, dialect: IntrospectorDialect) => {
     .addColumn('user_status', 'text');
 
   await builder.execute();
+
+  // Create a table with CHECK constraints to test enum extraction
+  await sql`
+    CREATE TABLE enum_test (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      status TEXT CHECK (status IN ('active', 'inactive', 'pending')) NOT NULL DEFAULT 'pending',
+      role TEXT CHECK (role IN ('admin', 'user', 'guest'))
+    )
+  `.execute(db);
 };
 
 export const addExtraColumn = async (db: Kysely<any>) => {

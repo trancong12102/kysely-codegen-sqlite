@@ -43,6 +43,29 @@ describe(Introspector.name, () => {
           new TableMetadata({
             columns: [
               new ColumnMetadata({
+                dataType: 'INTEGER',
+                isAutoIncrementing: true,
+                isNullable: true,
+                name: 'id',
+              }),
+              new ColumnMetadata({
+                dataType: 'TEXT',
+                enumValues: ['active', 'inactive', 'pending'],
+                hasDefaultValue: true,
+                name: 'status',
+              }),
+              new ColumnMetadata({
+                dataType: 'TEXT',
+                enumValues: ['admin', 'user', 'guest'],
+                isNullable: true,
+                name: 'role',
+              }),
+            ],
+            name: 'enum_test',
+          }),
+          new TableMetadata({
+            columns: [
+              new ColumnMetadata({
                 dataType: 'boolean',
                 name: 'false',
               }),

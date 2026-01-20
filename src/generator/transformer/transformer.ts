@@ -386,6 +386,11 @@ const transformColumnToArgs = (
     }
   }
 
+  // Check column-level enumValues (e.g., from CHECK constraints) before scalar types:
+  if (column.enumValues) {
+    return transformEnum(column.enumValues);
+  }
+
   const scalarNode = context.scalars[dataType];
 
   if (scalarNode) {
@@ -435,10 +440,6 @@ const transformColumnToArgs = (
   if (symbolName) {
     const node = new IdentifierNode(symbolName ?? 'unknown');
     return [node];
-  }
-
-  if (column.enumValues) {
-    return transformEnum(column.enumValues);
   }
 
   return [context.defaultScalar];
