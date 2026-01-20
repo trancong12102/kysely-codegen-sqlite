@@ -1,5 +1,5 @@
 import { DEFAULT_OUT_FILE } from '../generator';
-import { DEFAULT_URL, LOG_LEVEL_NAMES, VALID_DIALECTS } from './constants';
+import { DEFAULT_URL, LOG_LEVEL_NAMES } from './constants';
 
 type Flag = {
   default?: string;
@@ -30,11 +30,6 @@ export const FLAGS = [
   {
     description: 'Set the default schema(s) for the database connection.',
     longName: 'default-schema',
-  },
-  {
-    description: 'Set the SQL dialect.',
-    longName: 'dialect',
-    values: VALID_DIALECTS,
   },
   {
     description: 'Specify the path to an environment file to use.',

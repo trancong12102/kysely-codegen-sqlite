@@ -1,28 +1,20 @@
 import { config as loadEnv } from 'dotenv';
 import { expand as expandEnv } from 'dotenv-expand';
-import type { DialectName } from '../cli/config';
 import type { Logger } from './logger/logger';
 
 const CALL_STATEMENT_REGEXP = /^\s*([a-z]+)\s*\(\s*(.*)\s*\)\s*$/;
 
 type ParseConnectionStringOptions = {
   connectionString: string;
-  dialect?: DialectName;
   envFile?: string;
   logger?: Logger;
 };
 
-type ParsedConnectionString = {
-  connectionString: string;
-  dialect: DialectName;
-};
-
 /**
  * Parses a connection string URL or loads it from an environment file.
- * Upon success, it also returns which dialect was inferred from the connection string.
  */
 export class ConnectionStringParser {
-  parse(options: ParseConnectionStringOptions): ParsedConnectionString {
+  parse(options: ParseConnectionStringOptions): string {
     let connectionString = options.connectionString;
 
     const expressionMatch = connectionString.match(CALL_STATEMENT_REGEXP);
@@ -87,11 +79,6 @@ export class ConnectionStringParser {
       connectionString = envConnectionString;
     }
 
-    const dialect: DialectName = options.dialect ?? 'sqlite';
-
-    return {
-      connectionString,
-      dialect,
-    };
+    return connectionString;
   }
 }

@@ -28,7 +28,6 @@ describe(Cli.name, () => {
     const output = await new Cli().run({
       argv: ['--camel-case'],
       config: {
-        dialect: 'sqlite',
         logLevel: 'silent',
         outFile: null,
         url: ':memory:',
@@ -65,7 +64,6 @@ describe(Cli.name, () => {
     assert(['--default-schema=foo', '--default-schema=bar'], {
       defaultSchemas: ['foo', 'bar'],
     });
-    assert(['--dialect=sqlite'], { dialect: 'sqlite' });
     assert(['--exclude-pattern=public._*'], { excludePattern: 'public._*' });
     assert(['--help'], {});
     assert(['-h'], {});
@@ -139,7 +137,6 @@ describe(Cli.name, () => {
       { defaultSchemas: 'public' },
       'Invalid input: expected array, received string',
     );
-    assert({ dialect: 'sqlite3' }, 'Invalid input: expected "sqlite"');
     assert({ envFile: null }, 'Invalid input: expected string, received null');
     assert(
       { excludePattern: false },

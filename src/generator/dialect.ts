@@ -1,4 +1,3 @@
-import type { DialectName } from '../cli/config';
 import { IntrospectorDialect } from '../introspector/dialect';
 import type { Adapter } from './adapter';
 import { SqliteDialect } from './dialects/sqlite/sqlite-dialect';
@@ -10,6 +9,6 @@ export abstract class GeneratorDialect extends IntrospectorDialect {
   abstract readonly adapter: Adapter;
 }
 
-export const getDialect = (_name: DialectName): GeneratorDialect => {
+export const getDialect = (): GeneratorDialect => {
   return new SqliteDialect();
 };
