@@ -1,5 +1,11 @@
 # kysely-codegen-sqlite
 
+## 0.1.4
+
+### Patch Changes
+
+- 1ce23a6: Fix GitHub release to include changelog content
+
 ## 0.1.3
 
 ### Patch Changes
