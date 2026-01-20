@@ -18,6 +18,9 @@
   "homepage": "https://github.com/trancong12102/kysely-codegen-sqlite#readme",
   "scripts": {
     "build": "rimraf dist && tsc --project ./tsconfig.build.json",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish",
     "check:types": "tsc --noEmit",
     "ci": "run-s ci:*",
     "ci:build": "pnpm build",
@@ -54,6 +57,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.3",
     "@babel/eslint-parser": "^7.28.0",
+    "@changesets/cli": "^2.28.0",
     "@robinblomberg/eslint-config-prettier": "^0.1.4",
     "@robinblomberg/eslint-config-robinblomberg": "0.30.1",
     "@robinblomberg/prettier-config": "^0.2.0",
