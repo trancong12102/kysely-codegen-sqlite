@@ -1,6 +1,6 @@
 # ![kysely-codegen-sqlite](./assets/kysely-codegen-logo.svg) <!-- omit from toc -->
 
-`kysely-codegen-sqlite` generates Kysely type definitions from your database. That's it.
+`kysely-codegen-sqlite` generates Kysely type definitions from your SQLite database. That's it.
 
 ## Table of contents <!-- omit from toc -->
 
@@ -19,20 +19,7 @@ npm install --save-dev kysely-codegen-sqlite
 You will also need to install Kysely with your driver of choice:
 
 ```sh
-# PostgreSQL
-npm install kysely pg
-
-# MySQL
-npm install kysely mysql2
-
-# SQLite
 npm install kysely better-sqlite3
-
-# MSSQL
-npm install kysely tedious tarn @tediousjs/connection-string@0.5.0
-
-# LibSQL
-npm install @libsql/kysely-libsql
 ```
 
 ## Generating type definitions
@@ -40,25 +27,8 @@ npm install @libsql/kysely-libsql
 The most convenient way to get started is to create an `.env` file with your database connection string:
 
 ```sh
-# PostgreSQL
-DATABASE_URL=postgres://username:password@yourdomain.com/database
-
-# MySQL
-DATABASE_URL=mysql://username:password@yourdomain.com/database
-
-# SQLite
-DATABASE_URL=C:/Program Files/sqlite3/db
-
-# MSSQL
-DATABASE_URL=Server=mssql;Database=database;User Id=user;Password=password
-
-# LibSQL
-DATABASE_URL=libsql://token@host:port/database
+DATABASE_URL=./path/to/database.db
 ```
-
-> If your URL contains a password with special characters, those characters may need to be [percent-encoded](https://en.wikipedia.org/wiki/Percent-encoding#Reserved_characters).
->
-> If you are using _PlanetScale_, make sure your URL contains this SSL query string parameter: `ssl={"rejectUnauthorized":true}`
 
 Then run the following command, or add it to the scripts section in your package.json file:
 
@@ -76,8 +46,6 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Timestamp = ColumnType<Date, Date | string, Date | string>;
-
 export interface Company {
   id: Generated<number>;
   name: string;
@@ -85,12 +53,12 @@ export interface Company {
 
 export interface User {
   company_id: number | null;
-  created_at: Generated<Timestamp>;
+  created_at: Generated<string>;
   email: string;
   id: Generated<number>;
-  is_active: boolean;
+  is_active: number;
   name: string;
-  updated_at: Timestamp;
+  updated_at: string;
 }
 
 export interface DB {
@@ -110,20 +78,19 @@ kysely-codegen-sqlite --out-file ./src/db/db.d.ts
 Import `DB` into `new Kysely<DB>`, and you're done!
 
 ```ts
-import { Kysely, PostgresDialect } from 'kysely';
+import { Kysely } from 'kysely';
+import BetterSqlite3 from 'better-sqlite3';
+import { BetterSqlite3Dialect } from 'kysely';
 import { DB } from 'kysely-codegen-sqlite';
-import { Pool } from 'pg';
 
 const db = new Kysely<DB>({
-  dialect: new PostgresDialect({
-    pool: new Pool({
-      connectionString: process.env.DATABASE_URL,
-    }),
+  dialect: new BetterSqlite3Dialect({
+    database: new BetterSqlite3('./database.db'),
   }),
 });
 
 const rows = await db.selectFrom('users').selectAll().execute();
-//    ^ { created_at: Date; email: string; id: number; ... }[]
+//    ^ { created_at: string; email: string; id: number; ... }[]
 ```
 
 If you need to use the generated types in e.g. function parameters and type definitions, you may need to use the Kysely `Insertable`, `Selectable`, `Updateable` types. Note that you don't need to explicitly annotate query return values, as it's recommended to let Kysely infer the types for you.
@@ -166,12 +133,12 @@ Use the Kysely CamelCasePlugin for generated table column names.
 ```ts
 export interface User {
   companyId: number | null;
-  createdAt: Generated<Timestamp>;
+  createdAt: Generated<string>;
   email: string;
   id: Generated<number>;
-  isActive: boolean;
+  isActive: number;
   name: string;
-  updatedAt: Timestamp;
+  updatedAt: string;
 }
 ```
 
@@ -186,7 +153,7 @@ Specify custom type imports to use with type overrides. This is particularly use
 ##### Basic example
 
 ```sh
-kysely-codegen-sqlite --custom-imports='{"InstantRange":"./custom-types","MyCustomType":"@my-org/custom-types"}'
+kysely-codegen-sqlite --custom-imports='{"MyCustomType":"./custom-types"}'
 ```
 
 ##### Named imports with aliasing
@@ -194,25 +161,20 @@ kysely-codegen-sqlite --custom-imports='{"InstantRange":"./custom-types","MyCust
 You can import specific named exports and optionally alias them using the `#` syntax:
 
 ```sh
-kysely-codegen-sqlite --custom-imports='{"MyType":"./types#OriginalType","DateRange":"@org/utils#CustomDateRange"}'
+kysely-codegen-sqlite --custom-imports='{"MyType":"./types#OriginalType"}'
 ```
 
 This generates:
 
 ```ts
 import type { OriginalType as MyType } from './types';
-import type { CustomDateRange as DateRange } from '@org/utils';
 ```
 
 Then you can use these imported types in your overrides:
 
 ```sh
-kysely-codegen-sqlite --overrides='{"columns":{"events.date_range":"ColumnType<DateRange, DateRange, never>"}}'
+kysely-codegen-sqlite --overrides='{"columns":{"events.data":"ColumnType<MyCustomType, MyCustomType, never>"}}'
 ```
-
-#### --date-parser <!-- omit from toc -->
-
-Specify which parser to use for PostgreSQL date values. (values: `string`/`timestamp`, default: `timestamp`)
 
 #### --default-schema [value] <!-- omit from toc -->
 
@@ -221,12 +183,8 @@ Set the default schema(s) for the database connection.
 Multiple schemas can be specified:
 
 ```sh
-kysely-codegen-sqlite --default-schema=public --default-schema=hidden
+kysely-codegen-sqlite --default-schema=main --default-schema=temp
 ```
-
-#### --dialect [value] <!-- omit from toc -->
-
-Set the SQL dialect. (values: `postgres`/`mysql`/`sqlite`/`mssql`/`libsql`/`bun-sqlite`/`kysely-bun-sqlite`/`worker-bun-sqlite`)
 
 #### --env-file [value] <!-- omit from toc -->
 
@@ -238,35 +196,27 @@ Print all command line options.
 
 #### --include-pattern [value], --exclude-pattern [value] <!-- omit from toc -->
 
-You can choose which tables should be included during code generation by providing a glob pattern to the `--include-pattern` and `--exclude-pattern` flags. We use [micromatch](https://github.com/micromatch/micromatch) under the hood, which provides advanced glob support. For instance, if you only want to include your public tables:
+You can choose which tables should be included during code generation by providing a glob pattern to the `--include-pattern` and `--exclude-pattern` flags. We use [micromatch](https://github.com/micromatch/micromatch) under the hood, which provides advanced glob support. For instance, if you only want to include certain tables:
 
 ```sh
-kysely-codegen-sqlite --include-pattern="public.*"
+kysely-codegen-sqlite --include-pattern="user*"
 ```
 
-You can also include only certain tables within a schema:
+You can also include only certain tables:
 
 ```sh
-kysely-codegen-sqlite --include-pattern="public.+(user|post)"
+kysely-codegen-sqlite --include-pattern="+(user|post)"
 ```
 
-Or exclude an entire class of tables:
+Or exclude certain tables:
 
 ```sh
-kysely-codegen-sqlite --exclude-pattern="documents.*"
+kysely-codegen-sqlite --exclude-pattern="_*"
 ```
 
 #### --log-level [value] <!-- omit from toc -->
 
 Set the terminal log level. (values: `debug`/`info`/`warn`/`error`/`silent`, default: `warn`)
-
-#### --no-domains <!-- omit from toc -->
-
-Skip generating types for PostgreSQL domains. (default: `false`)
-
-#### --numeric-parser <!-- omit from toc -->
-
-Specify which parser to use for PostgreSQL numeric values. (values: `string`/`number`/`number-or-string`, default: `string`)
 
 #### --overrides <!-- omit from toc -->
 
@@ -282,43 +232,9 @@ kysely-codegen-sqlite --overrides='{"columns":{"table_name.column_name":"{foo:\"
 
 Set the file build path. (default: `./node_modules/kysely-codegen-sqlite/dist/db.d.ts`)
 
-#### --partitions <!-- omit from toc -->
-
-Include partitions of PostgreSQL tables in the generated code.
-
 #### --print <!-- omit from toc -->
 
 Print the generated output to the terminal instead of a file.
-
-#### --runtime-enums <!-- omit from toc -->
-
-The PostgreSQL `--runtime-enums` option generates runtime enums instead of string unions. You can optionally specify which naming convention to use for runtime enum keys. (values: [`pascal-case`, `screaming-snake-case`], default: `screaming-snake-case`)
-
-**Examples:**
-
-`--runtime-enums=false`
-
-```ts
-export type Status = 'CONFIRMED' | 'UNCONFIRMED';
-```
-
-`--runtime-enums` or `--runtime-enums=screaming-snake-case`
-
-```ts
-export enum Status {
-  CONFIRMED = 'CONFIRMED',
-  UNCONFIRMED = 'UNCONFIRMED',
-}
-```
-
-`--runtime-enums=pascal-case`
-
-```ts
-export enum Status {
-  Confirmed = 'CONFIRMED',
-  Unconfirmed = 'UNCONFIRMED',
-}
-```
 
 #### --singularize <!-- omit from toc -->
 
@@ -333,27 +249,10 @@ Specify type mappings for database types, in JSON format. This allows you to aut
 **Example:**
 
 ```sh
-kysely-codegen-sqlite --type-mapping='{"timestamptz":"Temporal.Instant","tstzrange":"InstantRange"}' --custom-imports='{"Temporal":"@js-temporal/polyfill","InstantRange":"./custom-types"}'
+kysely-codegen-sqlite --type-mapping='{"datetime":"Date"}' --custom-imports='{}'
 ```
 
-This is especially useful when you want to use modern JavaScript types like Temporal API instead of Date objects:
-
-```json
-{
-  "typeMapping": {
-    "date": "Temporal.PlainDate",
-    "daterange": "DateRange",
-    "interval": "Temporal.Duration",
-    "time": "Temporal.PlainTime",
-    "timestamp": "Temporal.Instant",
-    "timestamptz": "Temporal.Instant",
-    "tsrange": "InstantRange",
-    "tstzrange": "InstantRange"
-  }
-}
-```
-
-Type mappings are automatically applied to all columns of the specified database type, eliminating the need to override each column individually. This feature works with all supported databases, though some types (like PostgreSQL range types) are database-specific.
+Type mappings are automatically applied to all columns of the specified database type, eliminating the need to override each column individually.
 
 #### --type-only-imports <!-- omit from toc -->
 
@@ -378,20 +277,15 @@ The default configuration:
 {
   "camelCase": false,
   "customImports": {},
-  "dateParser": "timestamp",
-  "defaultSchemas": [], // ["public"] for PostgreSQL.
+  "defaultSchemas": [],
   "dialect": null,
-  "domains": true,
   "envFile": null,
   "excludePattern": null,
   "includePattern": null,
   "logLevel": "warn",
-  "numericParser": "string",
   "outFile": "./node_modules/kysely-codegen-sqlite/dist/db.d.ts",
   "overrides": {},
-  "partitions": false,
   "print": false,
-  "runtimeEnums": false,
   "singularize": false,
   "typeMapping": {},
   "typeOnlyImports": true,
@@ -406,25 +300,20 @@ The configuration object adds support for more advanced options:
 {
   "camelCase": true,
   "customImports": {
-    "InstantRange": "./custom-types",
     "MyCustomType": "@my-org/custom-types",
     "AliasedType": "./types#OriginalType"
   },
   "overrides": {
     "columns": {
-      "events.date_range": "ColumnType<InstantRange, InstantRange, never>",
       "posts.author_type": "AliasedType",
       "users.settings": "{ theme: 'dark' }"
     }
   },
   "singularize": {
-    "/^(.*?)s?$/": "$1_model",
-    "/(bacch)(?:us|i)$/i": "$1us"
+    "/^(.*?)s?$/": "$1_model"
   },
   "typeMapping": {
-    "date": "Temporal.PlainDate",
-    "interval": "Temporal.Duration",
-    "timestamptz": "Temporal.Instant"
+    "datetime": "Date"
   }
 }
 ```
@@ -432,16 +321,8 @@ The configuration object adds support for more advanced options:
 The generated output:
 
 ```ts
-import type { InstantRange } from './custom-types';
 import type { MyCustomType } from '@my-org/custom-types';
 import type { OriginalType as AliasedType } from './types';
-import type { Temporal } from '@js-temporal/polyfill';
-
-export interface EventModel {
-  createdAt: Temporal.Instant;
-  dateRange: ColumnType<InstantRange, InstantRange, never>;
-  eventDate: Temporal.PlainDate;
-}
 
 export interface UserModel {
   settings: { theme: 'dark' };
@@ -450,8 +331,6 @@ export interface UserModel {
 // ...
 
 export interface DB {
-  bacchi: Bacchus;
-  events: EventModel;
   users: UserModel;
 }
 ```
