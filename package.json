@@ -1,6 +1,6 @@
 {
   "name": "kysely-codegen-sqlite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Cong Tran <trancong12102@gmail.com>",
   "license": "MIT",
   "main": "./dist/index.js",
