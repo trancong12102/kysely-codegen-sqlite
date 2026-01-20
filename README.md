@@ -1,6 +1,6 @@
-# ![kysely-codegen](./assets/kysely-codegen-logo.svg) <!-- omit from toc -->
+# ![kysely-codegen-sqlite](./assets/kysely-codegen-logo.svg) <!-- omit from toc -->
 
-`kysely-codegen` generates Kysely type definitions from your database. That's it.
+`kysely-codegen-sqlite` generates Kysely type definitions from your database. That's it.
 
 ## Table of contents <!-- omit from toc -->
 
@@ -13,7 +13,7 @@
 ## Installation
 
 ```sh
-npm install --save-dev kysely-codegen
+npm install --save-dev kysely-codegen-sqlite
 ```
 
 You will also need to install Kysely with your driver of choice:
@@ -63,7 +63,7 @@ DATABASE_URL=libsql://token@host:port/database
 Then run the following command, or add it to the scripts section in your package.json file:
 
 ```sh
-kysely-codegen
+kysely-codegen-sqlite
 ```
 
 This command will generate a `.d.ts` file from your database, for example:
@@ -102,7 +102,7 @@ export interface DB {
 To specify a different output file:
 
 ```sh
-kysely-codegen --out-file ./src/db/db.d.ts
+kysely-codegen-sqlite --out-file ./src/db/db.d.ts
 ```
 
 ## Using the type definitions
@@ -111,7 +111,7 @@ Import `DB` into `new Kysely<DB>`, and you're done!
 
 ```ts
 import { Kysely, PostgresDialect } from 'kysely';
-import { DB } from 'kysely-codegen';
+import { DB } from 'kysely-codegen-sqlite';
 import { Pool } from 'pg';
 
 const db = new Kysely<DB>({
@@ -130,7 +130,7 @@ If you need to use the generated types in e.g. function parameters and type defi
 
 ```ts
 import { Insertable, Updateable } from 'kysely';
-import { DB } from 'kysely-codegen';
+import { DB } from 'kysely-codegen-sqlite';
 import { db } from './db';
 
 async function insertUser(user: Insertable<User>) {
@@ -186,7 +186,7 @@ Specify custom type imports to use with type overrides. This is particularly use
 ##### Basic example
 
 ```sh
-kysely-codegen --custom-imports='{"InstantRange":"./custom-types","MyCustomType":"@my-org/custom-types"}'
+kysely-codegen-sqlite --custom-imports='{"InstantRange":"./custom-types","MyCustomType":"@my-org/custom-types"}'
 ```
 
 ##### Named imports with aliasing
@@ -194,7 +194,7 @@ kysely-codegen --custom-imports='{"InstantRange":"./custom-types","MyCustomType"
 You can import specific named exports and optionally alias them using the `#` syntax:
 
 ```sh
-kysely-codegen --custom-imports='{"MyType":"./types#OriginalType","DateRange":"@org/utils#CustomDateRange"}'
+kysely-codegen-sqlite --custom-imports='{"MyType":"./types#OriginalType","DateRange":"@org/utils#CustomDateRange"}'
 ```
 
 This generates:
@@ -207,7 +207,7 @@ import type { CustomDateRange as DateRange } from '@org/utils';
 Then you can use these imported types in your overrides:
 
 ```sh
-kysely-codegen --overrides='{"columns":{"events.date_range":"ColumnType<DateRange, DateRange, never>"}}'
+kysely-codegen-sqlite --overrides='{"columns":{"events.date_range":"ColumnType<DateRange, DateRange, never>"}}'
 ```
 
 #### --date-parser <!-- omit from toc -->
@@ -221,7 +221,7 @@ Set the default schema(s) for the database connection.
 Multiple schemas can be specified:
 
 ```sh
-kysely-codegen --default-schema=public --default-schema=hidden
+kysely-codegen-sqlite --default-schema=public --default-schema=hidden
 ```
 
 #### --dialect [value] <!-- omit from toc -->
@@ -241,19 +241,19 @@ Print all command line options.
 You can choose which tables should be included during code generation by providing a glob pattern to the `--include-pattern` and `--exclude-pattern` flags. We use [micromatch](https://github.com/micromatch/micromatch) under the hood, which provides advanced glob support. For instance, if you only want to include your public tables:
 
 ```sh
-kysely-codegen --include-pattern="public.*"
+kysely-codegen-sqlite --include-pattern="public.*"
 ```
 
 You can also include only certain tables within a schema:
 
 ```sh
-kysely-codegen --include-pattern="public.+(user|post)"
+kysely-codegen-sqlite --include-pattern="public.+(user|post)"
 ```
 
 Or exclude an entire class of tables:
 
 ```sh
-kysely-codegen --exclude-pattern="documents.*"
+kysely-codegen-sqlite --exclude-pattern="documents.*"
 ```
 
 #### --log-level [value] <!-- omit from toc -->
@@ -275,12 +275,12 @@ Specify type overrides for specific table columns in JSON format.
 **Example:**
 
 ```sh
-kysely-codegen --overrides='{"columns":{"table_name.column_name":"{foo:\"bar\"}"}}'
+kysely-codegen-sqlite --overrides='{"columns":{"table_name.column_name":"{foo:\"bar\"}"}}'
 ```
 
 #### --out-file [value] <!-- omit from toc -->
 
-Set the file build path. (default: `./node_modules/kysely-codegen/dist/db.d.ts`)
+Set the file build path. (default: `./node_modules/kysely-codegen-sqlite/dist/db.d.ts`)
 
 #### --partitions <!-- omit from toc -->
 
@@ -333,7 +333,7 @@ Specify type mappings for database types, in JSON format. This allows you to aut
 **Example:**
 
 ```sh
-kysely-codegen --type-mapping='{"timestamptz":"Temporal.Instant","tstzrange":"InstantRange"}' --custom-imports='{"Temporal":"@js-temporal/polyfill","InstantRange":"./custom-types"}'
+kysely-codegen-sqlite --type-mapping='{"timestamptz":"Temporal.Instant","tstzrange":"InstantRange"}' --custom-imports='{"Temporal":"@js-temporal/polyfill","InstantRange":"./custom-types"}'
 ```
 
 This is especially useful when you want to use modern JavaScript types like Temporal API instead of Date objects:
@@ -369,7 +369,8 @@ Verify that the generated types are up-to-date. (default: `false`)
 
 ## Configuration file
 
-All codegen options can also be configured in a `.kysely-codegenrc.json` (or `.js`, `.ts`, `.yaml` etc.) file or the `kysely-codegen` property in `package.json`. See [Cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for all available configuration file formats.
+<!-- cspell:ignore sqliterc -->
+All codegen options can also be configured in a configuration file (e.g., `.kysely-codegen-sqliterc.json`, `.js`, `.ts`, `.yaml` etc.) or the `kysely-codegen-sqlite` property in `package.json`. See [Cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for all available configuration file formats.
 
 The default configuration:
 
@@ -386,7 +387,7 @@ The default configuration:
   "includePattern": null,
   "logLevel": "warn",
   "numericParser": "string",
-  "outFile": "./node_modules/kysely-codegen/dist/db.d.ts",
+  "outFile": "./node_modules/kysely-codegen-sqlite/dist/db.d.ts",
   "overrides": {},
   "partitions": false,
   "print": false,

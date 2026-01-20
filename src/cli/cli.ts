@@ -80,7 +80,7 @@ export class Cli {
   #loadConfig(config?: {
     configFile?: string;
   }): { config: unknown; filepath: string } | null {
-    const explorer = cosmiconfigSync('kysely-codegen');
+    const explorer = cosmiconfigSync('kysely-codegen-sqlite');
     return config?.configFile
       ? explorer.load(config.configFile)
       : explorer.search();
@@ -109,9 +109,13 @@ export class Cli {
 
   #showHelp() {
     console.info(
-      ['', 'kysely-codegen [options]', '', serializeFlags(FLAGS), ''].join(
-        '\n',
-      ),
+      [
+        '',
+        'kysely-codegen-sqlite [options]',
+        '',
+        serializeFlags(FLAGS),
+        '',
+      ].join('\n'),
     );
     process.exit(0);
   }
