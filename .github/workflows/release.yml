@@ -41,14 +41,16 @@ jobs:
         id: get_version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Check if version tag exists
-        id: check_tag
+      - name: Check if release exists
+        id: check_release
         run: |
-          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
+          if gh release view "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release Pull Request or Publish
         id: changesets
@@ -65,17 +67,27 @@ jobs:
         id: new_version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Create git tag and GitHub Release
-        if: steps.get_version.outputs.version != steps.new_version.outputs.version || steps.check_tag.outputs.exists == 'false'
+      - name: Extract changelog for version
+        id: changelog
+        if: steps.check_release.outputs.exists == 'false'
         run: |
           VERSION="${{ steps.new_version.outputs.version }}"
-          # Check if this version was just published (tag doesn't exist yet)
-          if ! git rev-parse "v${VERSION}" >/dev/null 2>&1; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git tag -a "v${VERSION}" -m "v${VERSION}"
-            git push origin "v${VERSION}"
-            gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
+          # Extract the changelog section for this version
+          CHANGELOG=$(awk "/^## ${VERSION}/{flag=1; next} /^## [0-9]/{flag=0} flag" CHANGELOG.md | sed '/^$/d')
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="Release v${VERSION}"
           fi
+          # Write to file to preserve newlines
+          echo "$CHANGELOG" > /tmp/changelog.txt
+          echo "file=/tmp/changelog.txt" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.new_version.outputs.version }}"
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes-file "${{ steps.changelog.outputs.file }}" \
+            --verify-tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
