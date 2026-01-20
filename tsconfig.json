@@ -20,7 +20,7 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2020",
-    "types": ["bun", "vitest/globals"]
+    "types": ["@types/node", "vitest/globals"]
   },
   "include": ["src"],
   "exclude": ["**/*.snapshot.ts"]

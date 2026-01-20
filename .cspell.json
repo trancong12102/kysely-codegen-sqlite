@@ -1,5 +1,14 @@
 {
   "enableFiletypes": ["dockercompose"],
+  "ignorePaths": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/test/**",
+    "**/*.fixtures.ts",
+    "pnpm-lock.yaml",
+    "**/*.svg",
+    "dist"
+  ],
   "words": [
     "Adminer",
     "attname",
