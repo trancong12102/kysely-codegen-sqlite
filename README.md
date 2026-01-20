@@ -455,3 +455,7 @@ export interface DB {
   users: UserModel;
 }
 ```
+
+## Credits
+
+This project is a fork of [kysely-codegen](https://github.com/RobinBlomberg/kysely-codegen) by [Robin Blomberg](https://github.com/RobinBlomberg). Thank you to the original author and all contributors for their work on the original project.
