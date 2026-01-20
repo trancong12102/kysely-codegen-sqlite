@@ -1,5 +1,11 @@
 # kysely-codegen-sqlite
 
+## 0.1.3
+
+### Patch Changes
+
+- f2007b3: Verify GitHub release creation in release workflow
+
 ## 0.1.2
 
 ### Patch Changes
