@@ -85,9 +85,15 @@ jobs:
         if: steps.check_release.outputs.exists == 'false'
         run: |
           VERSION="${{ steps.new_version.outputs.version }}"
+          # Create tag if it doesn't exist
+          if ! git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "v${VERSION}" -m "v${VERSION}"
+            git push origin "v${VERSION}"
+          fi
           gh release create "v${VERSION}" \
             --title "v${VERSION}" \
-            --notes-file "${{ steps.changelog.outputs.file }}" \
-            --verify-tag
+            --notes-file "${{ steps.changelog.outputs.file }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
