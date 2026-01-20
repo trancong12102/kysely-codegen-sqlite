@@ -7,5 +7,3 @@ export const LOG_LEVEL_NAMES = [
   'error',
   'silent',
 ] as const;
-
-export const VALID_DIALECTS = ['sqlite'];

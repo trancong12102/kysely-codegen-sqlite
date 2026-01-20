@@ -6,10 +6,10 @@ import { ConnectionStringParser } from '../generator/connection-string-parser';
 import { generate } from '../generator/generator/generate';
 import { DEFAULT_LOG_LEVEL } from '../generator/logger/log-level';
 import { Logger } from '../generator/logger/logger';
-import type { Config, DialectName } from './config';
-import { configSchema, dialectNameSchema } from './config';
+import type { Config } from './config';
+import { configSchema } from './config';
 import { ConfigError } from './config-error';
-import { DEFAULT_URL, VALID_DIALECTS } from './constants';
+import { DEFAULT_URL } from './constants';
 import { FLAGS, serializeFlags } from './flags';
 
 const compact = <T extends Record<string, unknown>>(object: T) => {
@@ -32,21 +32,13 @@ export class Cli {
     logger.debug(options);
     logger.debug();
 
-    const { connectionString, dialect: dialectName } =
-      connectionStringParser.parse({
-        connectionString: options.url ?? DEFAULT_URL,
-        dialect: options.dialect,
-        envFile: options.envFile,
-        logger,
-      });
+    const connectionString = connectionStringParser.parse({
+      connectionString: options.url ?? DEFAULT_URL,
+      envFile: options.envFile,
+      logger,
+    });
 
-    if (options.dialect) {
-      logger.info(`Using dialect '${options.dialect}'.`);
-    } else {
-      logger.info(`No dialect specified. Assuming '${dialectName}'.`);
-    }
-
-    const dialect = getDialect(dialectName);
+    const dialect = getDialect();
 
     const db = await dialect.introspector.connect({
       connectionString,
@@ -89,11 +81,6 @@ export class Cli {
   #parseBoolean(input: any): boolean | undefined {
     if (input === undefined) return undefined;
     return !!input && input !== 'false';
-  }
-
-  #parseDialectName(input: any): DialectName | undefined {
-    const result = dialectNameSchema.safeParse(input);
-    return result.success ? result.data : undefined;
   }
 
   #parseString(input: any): string | undefined {
@@ -199,7 +186,6 @@ export class Cli {
           ? JSON.parse(argv['custom-imports'])
           : undefined,
       defaultSchemas: this.#parseStringArray(argv['default-schema']),
-      dialect: this.#parseDialectName(argv.dialect),
       envFile: this.#parseString(argv['env-file']),
       excludePattern: this.#parseString(argv['exclude-pattern']),
       includePattern: this.#parseString(argv['include-pattern']),
@@ -231,16 +217,6 @@ export class Cli {
       ...(logLevel === undefined ? {} : { logLevel }),
       ...(outFile === undefined ? {} : { outFile }),
     };
-
-    if (
-      generateOptions.dialect &&
-      !VALID_DIALECTS.includes(generateOptions.dialect)
-    ) {
-      const dialectValues = VALID_DIALECTS.join(', ');
-      throw new RangeError(
-        `Parameter '--dialect' must have one of the following values: ${dialectValues}`,
-      );
-    }
 
     return generateOptions;
   }

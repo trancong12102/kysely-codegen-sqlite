@@ -5,33 +5,24 @@ describe(ConnectionStringParser.name, () => {
   const parser = new ConnectionStringParser();
 
   describe('sqlite', () => {
-    it('should infer the correct dialect name', () => {
+    it('should parse connection strings correctly', () => {
       deepStrictEqual(
         parser.parse({
           connectionString: 'C:/Program Files/sqlite3/db',
         }),
-        {
-          connectionString: 'C:/Program Files/sqlite3/db',
-          dialect: 'sqlite',
-        },
+        'C:/Program Files/sqlite3/db',
       );
       deepStrictEqual(
         parser.parse({
           connectionString: '/usr/local/bin',
         }),
-        {
-          connectionString: '/usr/local/bin',
-          dialect: 'sqlite',
-        },
+        '/usr/local/bin',
       );
       deepStrictEqual(
         parser.parse({
           connectionString: ':memory:',
         }),
-        {
-          connectionString: ':memory:',
-          dialect: 'sqlite',
-        },
+        ':memory:',
       );
     });
   });

@@ -20,7 +20,6 @@ export type Config = {
   camelCase?: boolean;
   customImports?: CustomImports;
   defaultSchemas?: string[];
-  dialect?: DialectName;
   envFile?: string;
   excludePattern?: string | null;
   includePattern?: string | null;
@@ -39,10 +38,6 @@ export type Config = {
 };
 
 export type CustomImports = Record<string, string>;
-
-export type DialectName = z.infer<typeof dialectNameSchema>;
-
-export const dialectNameSchema = z.enum(['sqlite']);
 
 const expressionNodeSchema = z.union([
   z.instanceof(ArrayExpressionNode),
@@ -66,7 +61,6 @@ export const configSchema = z.object({
   camelCase: z.boolean().optional(),
   customImports: z.record(z.string(), z.string()).optional(),
   defaultSchemas: z.array(z.string()).optional(),
-  dialect: dialectNameSchema.optional(),
   envFile: z.string().optional(),
   excludePattern: z.string().nullable().optional(),
   includePattern: z.string().nullable().optional(),
