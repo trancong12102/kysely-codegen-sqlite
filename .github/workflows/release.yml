@@ -37,6 +37,19 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Get current version
+        id: get_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Check if version tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
@@ -48,12 +61,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create GitHub Release
-        if: steps.changesets.outputs.published == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
-          name: v${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
-          generate_release_notes: true
+      - name: Get new version after publish
+        id: new_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create git tag and GitHub Release
+        if: steps.get_version.outputs.version != steps.new_version.outputs.version || steps.check_tag.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.new_version.outputs.version }}"
+          # Check if this version was just published (tag doesn't exist yet)
+          if ! git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "v${VERSION}" -m "v${VERSION}"
+            git push origin "v${VERSION}"
+            gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
